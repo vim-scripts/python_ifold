@@ -113,3 +113,13 @@ function! GetPythonFold(lnum)
     return "="
 
 endfunction
+
+" In case folding breaks down
+function! ReFold()
+    set foldmethod=expr
+    set foldexpr=0
+    set foldmethod=expr
+    set foldexpr=GetPythonFold(v:lnum)
+    set foldtext=PythonFoldText()
+    echo
+endfunction
