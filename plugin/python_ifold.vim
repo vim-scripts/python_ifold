@@ -1,10 +1,11 @@
 " Vim folding file
 " Language:	Python
-" Author:	Jorrit Wiersma (foldexpr), Max Ischenko (foldtext), Robert
+" Author:	Jorrit Wiersma (foldexpr), Max Ischenko (foldtext), Robert,
+" Jean-Pierre Chauvel
 " Ames (line counts)
-" Last Change:	2007 Ago 25
-" Version:	2.4
-" Bug fix:	Jean-Pierre Chauvel
+" Last Change:	2007 Ago 26
+" Version:	2.6
+"
 
 
 
@@ -13,9 +14,13 @@ if exists("b:did_ftplugin")
 endif
 let b:did_ftplugin = 1 
 
-setlocal foldmethod=expr
-setlocal foldexpr=GetPythonFold(v:lnum)
-setlocal foldtext=PythonFoldText()
+if !exists("g:ifold_support_markers")
+    let g:ifold_support_markers = 0
+endif
+
+if !exists("g:ifold_show_text")
+    let g:ifold_show_text = 0
+endif
 
 
 function! PythonFoldText()
@@ -52,26 +57,13 @@ function! GetPythonFold(lnum)
     "
     let line = getline(a:lnum - 1)
 
-    " Ignore blank lines
-    if line =~ '^\s*$'
-        return "="
-    endif
-
-    " Ignore triple quoted strings
-    if line =~ "(\"\"\"|''')"
-        return "="
-    endif
-
-    " Ignore continuation lines
-    if line =~ '\\$'
-        return '='
-    endif
-
     " Support markers
-    if line =~ '{{{'
-        return "a1"
-    elseif line =~ '}}}'
-        return "s1"
+    if g:ifold_support_markers
+        if line =~ '{{{'
+            return "a1"
+        elseif line =~ '}}}'
+            return "s1"
+        endif
     endif
 
     " Classes and functions get their own folds
@@ -80,29 +72,9 @@ function! GetPythonFold(lnum)
         return ">" . (b:ind / &sw + 1)
     endif
 
-    let pnum = prevnonblank(a:lnum - 1)
-
-    if pnum == 0
-	" Hit start of file
-        return 0
-    endif
-
-    " If the previous line has foldlevel zero, and we haven't increased
-    " it, we should have foldlevel zero also
-    if foldlevel(pnum) == 0
-        return 0
-    endif
-
-    " The end of a fold is determined through a difference in indentation
-    " between this line and the next.
-    " So first look for next line
-    let nnum = nextnonblank(a:lnum + 1)
-    if nnum == 0
-        return "="
-    endif
-
     " If next line has less or equal indentation than the first one,
     " we end a fold.
+    let nnum = nextnonblank(a:lnum + 1)
     let nind = indent(nnum)
     if nind <= b:ind
         let b:ind = nind
@@ -120,6 +92,12 @@ function! ReFold()
     set foldexpr=0
     set foldmethod=expr
     set foldexpr=GetPythonFold(v:lnum)
-    set foldtext=PythonFoldText()
+    if g:ifold_show_text
+        set foldtext=PythonFoldText()
+    else
+        set foldtext='Folded\ code'
+    endif
     echo
 endfunction
+
+call ReFold()
