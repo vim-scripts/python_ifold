@@ -1,11 +1,10 @@
 " Vim folding file
 " Language:	Python
 " Author:	Jorrit Wiersma (foldexpr), Max Ischenko (foldtext), Robert,
-" Jean-Pierre Chauvel
+" Jean-Pierre Chauvel (bugfixes)
 " Ames (line counts)
 " Last Change:	2007 Ago 26
-" Version:	2.6
-"
+" Version:	2.7
 
 
 
@@ -22,6 +21,7 @@ if !exists("g:ifold_show_text")
     let g:ifold_show_text = 0
 endif
 
+map <buffer> f :call ToggleFold()<CR> 
 
 function! PythonFoldText()
     let line = getline(v:foldstart)
@@ -84,6 +84,20 @@ function! GetPythonFold(lnum)
     " If none of the above apply, keep the indentation
     return "="
 
+endfunction
+
+let b:is_folding = 1
+
+function! ToggleFold()
+    if b:is_folding
+        set foldexpr=0
+        let b:is_folding = 0
+    else
+        call ReFold()
+        " Open the fold we are in
+        exec 'norm! zO'
+        let b:is_folding = 1
+    endif
 endfunction
 
 " In case folding breaks down
