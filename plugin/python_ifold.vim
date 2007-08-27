@@ -4,7 +4,8 @@
 " Jean-Pierre Chauvel (bugfixes)
 " Ames (line counts)
 " Last Change:	2007 Ago 26
-" Version:	2.7
+" Version:	2.8
+" Bugfix: Jean-Pierre Chauvel
 
 
 
@@ -66,8 +67,23 @@ function! GetPythonFold(lnum)
         endif
     endif
 
+
     " Classes and functions get their own folds
     if line =~ '^\s*\(class\|def\)\s'
+    " Verify if the next line is a class or function definition
+    " as well
+        let imm_nnum = a:lnum + 1
+        let nnum = nextnonblank(imm_nnum)
+        if imm_nnum == nnum
+            let imm_nind = indent(imm_nnum)
+            let ind = indent(a:lnum)
+            if ind > imm_nind
+                let imm_nline = getline(imm_nnum)
+                if imm_nline =~ '^\s*\(class\|def\)\s'
+                    return "="
+                endif
+            endif
+        endif
         let b:ind = indent(a:lnum - 1)
         return ">" . (b:ind / &sw + 1)
     endif
