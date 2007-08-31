@@ -3,8 +3,8 @@
 " Author:	Jorrit Wiersma (foldexpr), Max Ischenko (foldtext), Robert,
 " Jean-Pierre Chauvel (bugfixes)
 " Ames (line counts)
-" Last Change:	2007 Ago 26
-" Version:	2.8
+" Last Change:	2007 Ago 31
+" Version:	2.8.1
 " Bugfix: Jean-Pierre Chauvel
 
 
@@ -51,7 +51,7 @@ function! PythonFoldText()
 endfunction
 
 
-let b:ind = 0
+let b:nestinglevel = 0
 
 function! GetPythonFold(lnum)
     " Determine folding level in Python source
@@ -74,13 +74,18 @@ function! GetPythonFold(lnum)
     " as well
         let imm_nnum = a:lnum + 1
         let nnum = nextnonblank(imm_nnum)
-        if imm_nnum == nnum
-            let imm_nind = indent(imm_nnum)
-            let ind = indent(a:lnum)
-            if ind > imm_nind
-                let imm_nline = getline(imm_nnum)
-                if imm_nline =~ '^\s*\(class\|def\)\s'
-                    return "="
+        if nnum - imm_nnum < 2
+            let nind = indent(nnum)
+            let pind = indent(a:lnum - 1)
+            if pind >= nind
+                let nline = getline(nnum)
+                if nline =~ '^\s*\(class\|def\)\s'
+                    if b:nestinglevel
+                        let b:nestinglevel = (nind / &sw + 1)
+                        return "<" . b:nestinglevel
+                    else
+                        return "="
+                    endif
                 endif
             endif
         endif
@@ -93,8 +98,8 @@ function! GetPythonFold(lnum)
     let nnum = nextnonblank(a:lnum + 1)
     let nind = indent(nnum)
     if nind <= b:ind
-        let b:ind = nind
-        return "<" . (b:ind / &sw + 1)
+        let b:nestinglevel = (nind / &sw + 1)
+        return "<" . b:nestinglevel
     endif
 
     " If none of the above apply, keep the indentation
