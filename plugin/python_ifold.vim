@@ -4,7 +4,7 @@
 " Jean-Pierre Chauvel (bugfixes)
 " Ames (line counts)
 " Last Change:	2007 Ago 31
-" Version:	2.8.3
+" Version:	2.8.3.1
 " Bugfix: Jean-Pierre Chauvel
 
 
@@ -90,9 +90,17 @@ function! GetPythonFold(lnum)
     " If next line has less or equal indentation than the first one,
     " we end a fold.
     let nind = indent(nextnonblank(a:lnum + 1))
-    if nind <= b:nestinglevel + &sw
+    if nind <= b:nestinglevel
         let b:nestinglevel = nind
         return "<" . ((b:nestinglevel + &sw) / &sw)
+    else
+        let ind = indent(a:lnum)
+        if ind == (b:nestinglevel + &sw)
+            if nind < ind
+                let b:nestinglevel = nind
+                return "<" . ((b:nestinglevel + &sw) / &sw)
+            endif
+        endif
     endif
 
     " If none of the above apply, keep the indentation
