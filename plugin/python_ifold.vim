@@ -4,7 +4,7 @@
 " Jean-Pierre Chauvel (bugfixes)
 " Ames (line counts)
 " Last Change:	2007 Ago 31
-" Version:	2.8.1
+" Version:	2.8.2
 " Bugfix: Jean-Pierre Chauvel
 
 
@@ -79,7 +79,8 @@ function! GetPythonFold(lnum)
             let pind = indent(a:lnum - 1)
             if pind >= nind
                 let nline = getline(nnum)
-                if nline =~ '^\s*\(class\|def\)\s'
+                "if nline =~ "^\s*\(class\|def\)\s"
+                if nline =~ "[^\s]"
                     if b:nestinglevel
                         let b:nestinglevel = (nind / &sw + 1)
                         return "<" . b:nestinglevel
