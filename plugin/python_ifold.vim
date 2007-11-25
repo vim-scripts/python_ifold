@@ -3,8 +3,8 @@
 " Author:	Jorrit Wiersma (foldexpr), Max Ischenko (foldtext), Robert,
 " Jean-Pierre Chauvel (bugfixes)
 " Ames (line counts)
-" Last Change:	2007 Oct 19
-" Version:	2.8.3.2
+" Last Change:	2007 Nov 25
+" Version:	2.8.3.2.a
 " Bugfix: Jean-Pierre Chauvel
 
 
