@@ -4,7 +4,7 @@
 " Jean-Pierre Chauvel (bugfixes)
 " Ames (line counts)
 " Last Change:	2007 Nov 25
-" Version:	2.8.3.2.a
+" Version:	2.8.3.2.b
 " Bugfix: Jean-Pierre Chauvel
 
 
@@ -16,15 +16,15 @@ endif
 let b:did_ftplugin = 1 
 
 if !exists("g:ifold_support_markers")
-    let g:ifold_support_markers = 0
+    let g:ifold_support_markers = 1
 endif
 
 if !exists("g:ifold_show_text")
-    let g:ifold_show_text = 0
+    let g:ifold_show_text = 1
 endif
 
 if !exists("g:ifold_accuracy")
-    let g:ifold_accuracy = 0
+    let g:ifold_accuracy = 1
 endif
 
 map <buffer> f :call ToggleFold()<CR> 
