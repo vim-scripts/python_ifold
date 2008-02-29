@@ -3,8 +3,8 @@
 " Author:	Jorrit Wiersma (foldexpr), Max Ischenko (foldtext), Robert,
 " Jean-Pierre Chauvel (bugfixes)
 " Ames (line counts)
-" Last Change:	2007 Nov 25
-" Version:	2.8.3.2.b
+" Last Change:	2008 Feb 29
+" Version:	2.8.3.3.a
 " Bugfix: Jean-Pierre Chauvel
 
 
@@ -16,15 +16,15 @@ endif
 let b:did_ftplugin = 1 
 
 if !exists("g:ifold_support_markers")
-    let g:ifold_support_markers = 1
+    let g:ifold_support_markers = 0
 endif
 
 if !exists("g:ifold_show_text")
-    let g:ifold_show_text = 1
+    let g:ifold_show_text = 0
 endif
 
 if !exists("g:ifold_accuracy")
-    let g:ifold_accuracy = 1
+    let g:ifold_accuracy = 0
 endif
 
 map <buffer> f :call ToggleFold()<CR> 
@@ -71,7 +71,6 @@ function! GetPythonFold(lnum)
             return "s1"
         endif
     endif
-
 
     " Classes and functions get their own folds
     if line =~ '^\s*\(class\|def\)\s'
@@ -126,7 +125,6 @@ function! GetPythonFoldAccurately(lnum)
         endif
     endif
 
-
     " Classes and functions get their own folds
     if line =~ '^\s*\(class\|def\)\s'
     " Verify if the next line is a class or function definition
@@ -146,16 +144,19 @@ function! GetPythonFoldAccurately(lnum)
 
     " If next line has less or equal indentation than the first one,
     " we end a fold.
-    let nind = indent(nextnonblank(a:lnum + 1))
-    if nind <= b:nestinglevel
-        let b:nestinglevel = nind
-        return "<" . ((b:nestinglevel + &sw) / &sw)
-    else
-        let ind = indent(a:lnum)
-        if ind == (b:nestinglevel + &sw)
-            if nind < ind
-                let b:nestinglevel = nind
-                return "<" . ((b:nestinglevel + &sw) / &sw)
+    let nnonblank = nextnonblank(a:lnum + 1)
+    if getline(nnonblank) !~ '^\s*#.*'
+        let nind = indent(nnonblank)
+        if nind <= b:nestinglevel
+            let b:nestinglevel = nind
+            return "<" . ((b:nestinglevel + &sw) / &sw)
+        else
+            let ind = indent(a:lnum)
+            if ind == (b:nestinglevel + &sw)
+                if nind < ind
+                    let b:nestinglevel = nind
+                    return "<" . ((b:nestinglevel + &sw) / &sw)
+                endif
             endif
         endif
     endif
