@@ -3,8 +3,8 @@
 " Author:	Jorrit Wiersma (foldexpr), Max Ischenko (foldtext), Robert,
 " Jean-Pierre Chauvel (bugfixes)
 " Ames (line counts)
-" Last Change:	2008 Feb 29
-" Version:	2.8.3.3.b
+" Last Change:	2008 Mar 8
+" Version:	2.8.3.4.b
 " Bugfix: Jean-Pierre Chauvel
 
 
@@ -145,7 +145,8 @@ function! GetPythonFoldAccurately(lnum)
     " If next line has less or equal indentation than the first one,
     " we end a fold.
     let nnonblank = nextnonblank(a:lnum + 1)
-    if getline(nnonblank) !~ '^\s*#.*'
+    let nextline = getline(nnonblank) 
+    if (nextline !~ '^\s*#.*') || (nextline =~ '^\s*#\+\s*\(class\|def\)\s')
         let nind = indent(nnonblank)
         if nind <= b:nestinglevel
             let b:nestinglevel = nind
