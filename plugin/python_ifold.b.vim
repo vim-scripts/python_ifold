@@ -1,11 +1,9 @@
 " Vim folding file
 " Language:	Python
 " Author:	Jorrit Wiersma (foldexpr), Max Ischenko (foldtext), Robert,
-" Jean-Pierre Chauvel (bugfixes)
-" Ames (line counts)
-" Last Change:	2008 Mar 8
-" Version:	2.8.3.4.b
-" Bugfix: Jean-Pierre Chauvel
+" Ames (line counts), Jean-Pierre Chauvel (bugfixes and improvements)
+" Last Change:	2008 Apr 1
+" Version:	2.8.3.5.b
 
 
 
@@ -62,15 +60,6 @@ function! GetPythonFold(lnum)
     " Determine folding level in Python source
     "
     let line = getline(a:lnum - 1)
-
-    " Support markers
-    if g:ifold_support_markers
-        if line =~ '{{{'
-            return "a1"
-        elseif line =~ '}}}'
-            return "s1"
-        endif
-    endif
 
     " Classes and functions get their own folds
     if line =~ '^\s*\(class\|def\)\s'

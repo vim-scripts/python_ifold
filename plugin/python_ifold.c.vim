@@ -3,7 +3,7 @@
 " Author:	Jorrit Wiersma (foldexpr), Max Ischenko (foldtext), Robert,
 " Ames (line counts), Jean-Pierre Chauvel (bugfixes and improvements)
 " Last Change:	2008 Apr 1
-" Version:	2.8.3.5.a
+" Version:	2.8.3.5.c
 
 
 
@@ -14,16 +14,24 @@ endif
 let b:did_ftplugin = 1 
 
 if !exists("g:ifold_support_markers")
-    let g:ifold_support_markers = 0
+    let g:ifold_support_markers = 1
 endif
 
 if !exists("g:ifold_show_text")
-    let g:ifold_show_text = 0
+    let g:ifold_show_text = 1
 endif
 
 if !exists("g:ifold_accuracy")
-    let g:ifold_accuracy = 0
+    let g:ifold_accuracy = 1
 endif
+
+" Use these settings for every python file
+set tabstop=4
+set softtabstop=4
+set shiftwidth=4
+set expandtab
+set autoindent
+set foldcolumn=1
 
 map <buffer> f :call ToggleFold()<CR> 
 
