@@ -2,9 +2,9 @@
 " Language:	Python
 " Author:	Jorrit Wiersma (foldexpr), Max Ischenko (foldtext), Robert,
 " Ames (line counts), Jean-Pierre Chauvel (bugfixes and improvements)
-" Last Change:	2008 Apr 1
-" Version:	2.8.3.5.b
-
+" Last Change:	2008 Apr 18
+" Version:	2.8.3.6.b
+" Bugfixes: Jean-Pierre Chauvel
 
 
 if exists("b:did_ftplugin")
@@ -115,7 +115,7 @@ function! GetPythonFoldAccurately(lnum)
     endif
 
     " Classes and functions get their own folds
-    if line =~ '^\s*\(class\|def\)\s'
+      if line =~ '^\s*\(class\|def\)\s'
     " Verify if the next line is a class or function definition
     " as well
         let imm_nnum = a:lnum + 1
@@ -135,7 +135,7 @@ function! GetPythonFoldAccurately(lnum)
     " we end a fold.
     let nnonblank = nextnonblank(a:lnum + 1)
     let nextline = getline(nnonblank) 
-    if (nextline !~ '^\s*#.*') || (nextline =~ '^\s*#\+\s*\(class\|def\)\s')
+    if (nextline !~ '^\s*#\+.*')
         let nind = indent(nnonblank)
         if nind <= b:nestinglevel
             let b:nestinglevel = nind
