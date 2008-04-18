@@ -3,7 +3,7 @@
 " Author:	Jorrit Wiersma (foldexpr), Max Ischenko (foldtext), Robert,
 " Ames (line counts), Jean-Pierre Chauvel (bugfixes and improvements)
 " Last Change:	2008 Apr 18
-" Version:	2.8.3.6.a
+" Version:	2.8.3.7.a
 " Bugfixes: Jean-Pierre Chauvel
 
 
@@ -55,6 +55,7 @@ endfunction
 
 
 let b:nestinglevel = 0
+let b:classdefinition = 0
 
 function! GetPythonFold(lnum)
     " Determine folding level in Python source
@@ -76,7 +77,12 @@ function! GetPythonFold(lnum)
                 return "<" . ((b:nestinglevel + &sw) / &sw)
             endif
         endif
+        let b:classdefinition = 1
         let b:nestinglevel = indent(a:lnum - 1)
+    endif
+
+    if line =~ '^.*:' && b:classdefinition
+        let b:classdefinition = 0
         return ">" . ((b:nestinglevel + &sw) / &sw)
     endif
 
@@ -127,7 +133,12 @@ function! GetPythonFoldAccurately(lnum)
             let b:nestinglevel = nind
             return "<" . ((b:nestinglevel + &sw) / &sw)
         endif
+        let b:classdefinition = 1
         let b:nestinglevel = indent(a:lnum - 1)
+    endif
+
+    if line =~ '^.*:' && b:classdefinition
+        let b:classdefinition = 0
         return ">" . ((b:nestinglevel + &sw) / &sw)
     endif
 
