@@ -2,30 +2,22 @@
 " Language:	Python
 " Author:	Jorrit Wiersma (foldexpr), Max Ischenko (foldtext), Robert,
 " Ames (line counts), Jean-Pierre Chauvel (bugfixes and improvements)
-" Last Change:	2008 Apr 18
-" Version:	2.8.3.7.c
+" Last Change:	2008 Apr 20
+" Version:	2.9.c
 " Bugfixes: Jean-Pierre Chauvel
 
 
 if exists("b:did_ftplugin")
     finish
 endif
-
 let b:did_ftplugin = 1 
 
-if !exists("g:ifold_support_markers")
-    let g:ifold_support_markers = 1
+if !exists("g:ifold_mode")
+    let g:ifold_mode = 1
 endif
 
-if !exists("g:ifold_show_text")
-    let g:ifold_show_text = 1
-endif
+map <buffer> f :call ToggleFold()<CR> 
 
-if !exists("g:ifold_accuracy")
-    let g:ifold_accuracy = 1
-endif
-
-" Use these settings for every python file
 set tabstop=4
 set softtabstop=4
 set shiftwidth=4
@@ -33,7 +25,9 @@ set expandtab
 set autoindent
 set foldcolumn=1
 
-map <buffer> f :call ToggleFold()<CR> 
+let w:nestinglevel = 0
+let w:signature = 0
+let w:is_folded = 1
 
 function! PythonFoldText()
     let line = getline(v:foldstart)
@@ -61,13 +55,7 @@ function! PythonFoldText()
         return size . " lines: " . line
 endfunction
 
-
-let b:nestinglevel = 0
-let b:classdefinition = 0
-
 function! GetPythonFold(lnum)
-    " Determine folding level in Python source
-    "
     let line = getline(a:lnum - 1)
 
     " Classes and functions get their own folds
@@ -81,31 +69,26 @@ function! GetPythonFold(lnum)
             let pind = indent(a:lnum - 1)
             if pind >= nind
                 let nline = getline(nnum)
-                let b:nestinglevel = nind
-                return "<" . ((b:nestinglevel + &sw) / &sw)
+                let w:nestinglevel = nind
+                return "<" . ((w:nestinglevel + &sw) / &sw)
             endif
         endif
-        let b:classdefinition = 1
-        let b:nestinglevel = indent(a:lnum - 1)
-    endif
-
-    if line =~ '^.*:' && b:classdefinition
-        let b:classdefinition = 0
-        return ">" . ((b:nestinglevel + &sw) / &sw)
+        let w:nestinglevel = indent(a:lnum - 1)
+        return ">" . ((w:nestinglevel + &sw) / &sw)
     endif
 
     " If next line has less or equal indentation than the first one,
     " we end a fold.
     let nind = indent(nextnonblank(a:lnum + 1))
-    if nind <= b:nestinglevel
-        let b:nestinglevel = nind
-        return "<" . ((b:nestinglevel + &sw) / &sw)
+    if nind <= w:nestinglevel
+        let w:nestinglevel = nind
+        return "<" . ((w:nestinglevel + &sw) / &sw)
     else
         let ind = indent(a:lnum)
-        if ind == (b:nestinglevel + &sw)
+        if ind == (w:nestinglevel + &sw)
             if nind < ind
-                let b:nestinglevel = nind
-                return "<" . ((b:nestinglevel + &sw) / &sw)
+                let w:nestinglevel = nind
+                return "<" . ((w:nestinglevel + &sw) / &sw)
             endif
         endif
     endif
@@ -114,18 +97,16 @@ function! GetPythonFold(lnum)
     return "="
 endfunction
 
-function! GetPythonFoldAccurately(lnum)
+function! GetPythonFoldBest(lnum)
     " Determine folding level in Python source
     "
     let line = getline(a:lnum - 1)
 
-    " Support markers
-    if g:ifold_support_markers
-        if line =~ '{{{'
-            return "a1"
-        elseif line =~ '}}}'
-            return "s1"
-        endif
+    " Handle Support markers
+    if line =~ '{{{'
+        return "a1"
+    elseif line =~ '}}}'
+        return "s1"
     endif
 
     " Classes and functions get their own folds
@@ -138,33 +119,28 @@ function! GetPythonFoldAccurately(lnum)
         let pind = indent(a:lnum - 1)
         if pind >= nind
             let nline = getline(nnum)
-            let b:nestinglevel = nind
-            return "<" . ((b:nestinglevel + &sw) / &sw)
+            let w:nestinglevel = nind
+            return "<" . ((w:nestinglevel + &sw) / &sw)
         endif
-        let b:classdefinition = 1
-        let b:nestinglevel = indent(a:lnum - 1)
-    endif
-
-    if line =~ '^.*:' && b:classdefinition
-        let b:classdefinition = 0
-        return ">" . ((b:nestinglevel + &sw) / &sw)
+        let w:nestinglevel = indent(a:lnum - 1)
+        return ">" . ((w:nestinglevel + &sw) / &sw)
     endif
 
     " If next line has less or equal indentation than the first one,
     " we end a fold.
     let nnonblank = nextnonblank(a:lnum + 1)
     let nextline = getline(nnonblank) 
-    if (nextline !~ '^\s*#\+.*')
+    if (nextline !~ '^#\+.*')
         let nind = indent(nnonblank)
-        if nind <= b:nestinglevel
-            let b:nestinglevel = nind
-            return "<" . ((b:nestinglevel + &sw) / &sw)
+        if nind <= w:nestinglevel
+            let w:nestinglevel = nind
+            return "<" . ((w:nestinglevel + &sw) / &sw)
         else
             let ind = indent(a:lnum)
-            if ind == (b:nestinglevel + &sw)
+            if ind == (w:nestinglevel + &sw)
                 if nind < ind
-                    let b:nestinglevel = nind
-                    return "<" . ((b:nestinglevel + &sw) / &sw)
+                    let w:nestinglevel = nind
+                    return "<" . ((w:nestinglevel + &sw) / &sw)
                 endif
             endif
         endif
@@ -174,17 +150,75 @@ function! GetPythonFoldAccurately(lnum)
     return "="
 endfunction
 
-let b:is_folding = 1
+function! GetPythonFoldExperimental(lnum)
+    " Determine folding level in Python source
+    "
+    let line = getline(a:lnum - 1)
+
+    " Handle suport markers
+    if line =~ '{{{'
+        return "a1"
+    elseif line =~ '}}}'
+        return "s1"
+    endif
+
+    " Classes and functions get their own folds
+      if line =~ '^\s*\(class\|def\)\s'
+    " Verify if the next line is a class or function definition
+    " as well
+        let imm_nnum = a:lnum + 1
+        let nnum = nextnonblank(imm_nnum)
+        let nind = indent(nnum)
+        let pind = indent(a:lnum - 1)
+        if pind >= nind
+            let nline = getline(nnum)
+            let w:nestinglevel = nind
+            return "<" . ((w:nestinglevel + &sw) / &sw)
+        endif
+        let w:signature = 1
+        let w:nestinglevel = indent(a:lnum - 1)
+    endif
+
+    if line =~ '^.*:' && w:signature
+        let w:signature = 0
+        return ">" . ((w:nestinglevel + &sw) / &sw)
+    endif
+
+    " If next line has less or equal indentation than the first one,
+    " we end a fold.
+    let nnonblank = nextnonblank(a:lnum + 1)
+    let nextline = getline(nnonblank) 
+    if (nextline !~ '^#\+.*')
+        let nind = indent(nnonblank)
+        if nind <= w:nestinglevel
+            let w:nestinglevel = nind
+            return "<" . ((w:nestinglevel + &sw) / &sw)
+        else
+            let ind = indent(a:lnum)
+            if ind == (w:nestinglevel + &sw)
+                if nind < ind
+                    let w:nestinglevel = nind
+                    return "<" . ((w:nestinglevel + &sw) / &sw)
+                endif
+            endif
+        endif
+    endif
+
+    " If none of the above apply, keep the indentation
+    return "="
+endfunction
 
 function! ToggleFold()
-    if b:is_folding
+    let w:nestinglevel = 0
+    let w:signature = 0
+    if w:is_folded
         set foldexpr=0
-        let b:is_folding = 0
+        let w:is_folded = 0
     else
         call ReFold()
         " Open the fold we are in
         exec 'norm! zO'
-        let b:is_folding = 1
+        let w:is_folded = 1
     endif
 endfunction
 
@@ -193,12 +227,19 @@ function! ReFold()
     set foldmethod=expr
     set foldexpr=0
     set foldmethod=expr
-    if g:ifold_accuracy
-        set foldexpr=GetPythonFoldAccurately(v:lnum)
-    else
+    if g:ifold_mode == 0
         set foldexpr=GetPythonFold(v:lnum)
+    else
+        if g:ifold_mode == 1
+            set foldexpr=GetPythonFoldBest(v:lnum)
+        else
+            if g:ifold_mode == 2
+                set foldexpr=GetPythonFoldExperimental(v:lnum)
+            endif
+        endif
     endif
-    if g:ifold_show_text
+
+    if g:ifold_mode
         set foldtext=PythonFoldText()
     else
         set foldtext='Folded\ code'
