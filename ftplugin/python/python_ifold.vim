@@ -16,7 +16,7 @@ if !exists("g:ifold_mode")
     let g:ifold_mode = 1
 endif
 
-map <buffer> f :call ToggleFold()<CR> 
+map <buffer>  <leader>f :call ToggleFold()<CR> 
 
 set tabstop=4
 set softtabstop=4
