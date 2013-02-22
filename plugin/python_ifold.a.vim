@@ -16,7 +16,7 @@ if !exists("g:ifold_mode")
     let g:ifold_mode = 0
 endif
 
-map <buffer> f :call ToggleFold()<CR> 
+map <buffer> <Leader>f :call ToggleFold()<CR>
 
 let w:nestinglevel = 0
 let w:signature = 0
